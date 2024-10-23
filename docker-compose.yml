@@ -1,0 +1,44 @@
+services:
+  laravel-docker:
+    container_name: laravel-docker
+    build: .
+    volumes:
+      - ./laravel-app:/var/www/html
+      - ./docker/apache/apache.conf:/etc/apache2/sites-available/000-default.conf
+    ports:
+      - "9000:80"
+    networks:
+      - app-network
+    depends_on:
+      - mysql_db
+  
+  mysql_db:
+    image: mysql:8.0
+    container_name: mysql_container
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: test
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - app-network
+  
+  phpmyadmin:
+    image: phpmyadmin:latest
+    ports:
+      - "9001:80"
+    environment:
+      - PMA_HOST=mysql_db
+    networks:
+      - app-network
+    depends_on:
+      - mysql_db
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
